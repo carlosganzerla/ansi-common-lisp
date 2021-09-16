@@ -58,3 +58,59 @@
                             (t (list submax submax-score)))))
                (most-rec tail new-max new-submax))))))
     (most-rec lst (list nil nil) (list nil nil))))
+
+
+;; Exercise 5
+(defun filter (fn lst)
+  (remove-if (lambda (x) (not (funcall fn x))) lst))
+
+(defun filter2 (fn lst)
+  (let ((acc nil))
+    (dolist (x lst)
+      (let ((val (funcall fn x)))
+        (if val (push val acc))))
+    (nreverse acc)))
+
+(defun remove-if2 (fn lst)
+  (filter2 (lambda (x) (not (funcall fn x))) lst))
+
+;; Exercise 6
+(let ((greatest nil))
+  (defun greatest-arg (x)
+    (if (or (not greatest) (> x greatest))
+        (setf greatest x)
+        greatest)))
+
+
+;; Exercise 7
+(let ((last-arg nil))
+  (defun is-arg-greater (x)
+    (let ((result (cond ((and last-arg (> x last-arg)) t)
+                        (t nil))))
+      (setf last-arg x)
+      result)))
+
+
+;; Exercise 8
+(defun expensive (x)
+  (format t "Dont call me, I'm expensive. Value: ~A~%" x)
+  (* x x))
+
+;; Memoization
+(let ((memo-table nil))
+  (defun frugal (x)
+    (let ((memo-result (assoc x memo-table)))
+      (if memo-result
+          (cdr memo-result)
+          (let ((result (expensive x))) 
+            (progn
+              (setf memo-table (cons (cons x result) memo-table))
+              result))))))
+
+;; Exercise 9
+(defun apply-octal (fn arg &rest args)
+  (let ((*print-base* 8))
+    (apply fn arg args)))
+
+(defun print-nums (&rest nums)
+  (mapc #'print nums))

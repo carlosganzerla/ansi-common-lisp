@@ -1,14 +1,3 @@
-(defun our-member (obj lst)
-  (cond ((atom lst) nil)
-        ((eql (car lst) obj) lst)
-        (t (our-member obj (cdr lst)))))
-
-(unwind-protect
-  2
-  (format t "puta"))
-
-(dotimes)
-
 ;; Exercise 1
 
 ;; a

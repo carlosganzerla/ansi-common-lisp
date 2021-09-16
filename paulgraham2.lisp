@@ -60,13 +60,9 @@
           nil))
     cnt))
 
-((format t "puta") 1)
-(format t "cu")
-
 (adjoin 'a '(a b c))
 
 (defun our-length (1st)
-  " Does some shit"
   (let ((len 0))
     (dolist (obj 1st)
       (setf len (+ len 1)))

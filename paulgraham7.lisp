@@ -48,6 +48,8 @@
 
 ;; Remaking replacer instead of exercise 5 and 6.
 
+;; TODO: Do this shit later (someday, IDK)
+
 (defun replace-file (input-file old output-file new)
   
   )
@@ -65,19 +67,26 @@
                  (cond ((eql match-pos len)
                         (princ new out)
                         (setf match-pos 0))))
-                (t 
-                 (princ 
-                   )
-                 
-                 
-                 ))
+                ((eql match-pos 0) (princ next out))
+                (t (flush-buffer out next buffer))
+                
+                )
+          
 
         )
     )
   
 )
 
-(defun flush-buffer (out next match buffer)
-  (princ (svref buffer 0) out)
-  
+(defun flush-buffer (out next buffer)
+  (flush out buffer 0)
+  (do ((pos 1 (1+ pos))
+       ((not ()))
+       )
+      
+      )
   )
+
+(defun flush (out buffer idx)
+  (princ (svref buffer idx) out)
+  (setf (svref buffer idx) nil))

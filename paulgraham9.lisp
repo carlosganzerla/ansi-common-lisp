@@ -8,21 +8,21 @@
 
 ;; Exercise 2
 (defun get-coins (cents &optional (coins (list 25 10 5 1)))
-  (labels 
+  (labels
     ((get-coins-inner (coins remaining acc)
        (if coins
            (let* ((coin (car coins))
                   (ratio (/ remaining coin))
                   (usable (floor ratio)))
-             (get-coins-inner (cdr coins) 
-                              (- remaining (* coin usable)) 
+             (get-coins-inner (cdr coins)
+                              (- remaining (* coin usable))
                               (cons usable acc)))
            (nreverse acc))))
     (get-coins-inner coins cents nil)))
 
 ;; Exercise 3
-(defun run-contest (&optional 
-                     (singers 10) 
+(defun run-contest (&optional
+                     (singers 10)
                      (contestants '(:wigglies :wobblies)))
   (let ((prizes nil))
     (do ((i singers (- i 1)))
@@ -59,29 +59,33 @@
 
 (defun in-range (x y s)
   (destructuring-bind ((x1 y1) (x2 y2)) s
-    (and (>= x x1) (>= y y1) (>= x2 x) (>= y2 y))))
+    (and (>= x (min x1 x2)) (>= y (min y1 y2))
+          (>= (max x1 x2) x) (>= (max y1 y2) y))))
 
-;; todo finish this shit later
+(defun get-y (x slope y-intercept)
+  (values x (+ (* slope x) y-intercept)))
+
+
 (defun intersect (s1 s2)
   (destructuring-bind ((p11 p12) (p21 p22)) (list s1 s2)
     (let* ((slope-1 (slope p11 p12))
            (slope-2 (slope p21 p22))
            (y-intercept-1 (y-intercept p11 p12))
-           (y-intercept-2 (y-intercept p21 p22))
-           (sloped (if (and slope-1 slope-2) 
-                       (- slope-1 slope-2)
-                       0)))
-      (if (zerop sloped)
-          nil
-          (cond ((and y-intercept-1 y-intercept-2)
-                 (let* ((x (/ (- y-intercept-2 y-intercept-1) sloped))
-                        (y (+ (* slope-1 x) y-intercept-1)))
-                        (if (and (in-range x y s1) (in-range x y s2))
-                            (values x y)
-                            nil)))
-                ((null y-intercept-1)))))))
+           (y-intercept-2 (y-intercept p21 p22)))
+      (cond ((and (not y-intercept-1) (not y-intercept-2)) nil)
+            ((not y-intercept-1) (get-y (car p11) slope-2 y-intercept-2))
+            ((not y-intercept-2) (get-y (car p21) slope-1 y-intercept-1))
+            ((and slope-1 slope-2)
+             (let ((sloped (- slope-1 slope-2)))
+               (when (not (zerop sloped))
+                 (get-y (/ (- y-intercept-2 y-intercept-1) sloped)
+                        slope-1
+                        y-intercept-1))))))))
 
-
+(defun intersect-range (s1 s2)
+  (multiple-value-bind (x y) (intersect s1 s2)
+    (when (and (in-range x y s1) (in-range x y s2))
+      (values x y))))
 
 
 ;; Exercise 8

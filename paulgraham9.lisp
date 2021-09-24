@@ -88,6 +88,30 @@
       (values x y))))
 
 
+;; Exercise 5
+;; This way is dumb, there's a better way but 2 lazy to search for it
+(defun root (f min max e)
+  (do ((i min (+ i e)))
+      ((or (>= e (funcall f i) (- e))
+           (> i max)) 
+       i)))
+
+(defun fx (x)
+  (+ (* 0.3123 x x) (- (* 2.313 x)) .0654))
+
+;; Exercise 6
+
+(defun horner (x &rest args)
+  (labels
+    ((evaluate (coeffs acc)
+       (if (not coeffs)
+           acc
+           (evaluate (cdr coeffs) (+ (* x acc) (car coeffs))))))
+    (let ((a (car args)) (b (cadr args)))
+      (cond ((not args) 0)
+        ((not b) a)
+        (t (evaluate (cddr args) (+ (* x a) b)))))))
+
 ;; Exercise 8
 ;; It seems SBCL uses 64 bits aka 8 bytes
 

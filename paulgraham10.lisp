@@ -1,5 +1,4 @@
 ;; Macro utils
-
 (defmacro with-gensyms (syms &body body)
   `(let (,@(mapcar (lambda (s) `(,s (gensym))) syms))
      ,@body))
@@ -60,15 +59,11 @@
   (n-of n (incf i))) 
 
 ;; Exercise 6
-(defmacro with-value-reverting (vars &body body)
-  (let 
-   (
-    (prog1 
-       (progn ,@body) 
-       ,@(mapcar (lambda (var sym) `(setf ,var ,sym)) vars syms)))))
+(defmacro retain (params &body body)
+  `((lambda ,params ,@body) ,@params))
 
 (let ((i 3) (j 5))
-  (with-value-reverting (i j) 
+  (retain (i j) 
     (print i)
     (setf i 32)
     (print i)
@@ -76,8 +71,35 @@
     (setf j -3)
     (print j))
   (print i)
-  (print j))
+  (print j)
+  nil)
 
 ;; Exercise 7
 
+;; This call evaluates lst twice, so if the evaluation of ,lst changes the
+;; list, it won't work as expected.
+
+(defmacro my-push (obj lst)
+  `(setf ,lst (cons ,obj ,lst)))
+
+(let ((lst (list 1 2 5)))
+  (my-push (pop lst) (cdr (nreverse lst))))
+
+(let ((lst (list 1 2 5)))
+  (push (pop lst) (cdr (nreverse lst))))
+
 ;; Exercise 8
+
+(defmacro my-double (x)
+  (with-gensyms (val)
+    `(let ((,val ,x))
+       (setf ,x (* ,val 2)))))
+
+(let ((x 1) (y 3) (lst (list 10 2 3 4)))
+  (my-double x)
+  (my-double y)
+  (my-double (car lst))
+  (print x)
+  (print y)
+  (print lst)
+  nil)

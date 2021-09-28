@@ -1,3 +1,9 @@
+;; Macro utils
+
+(defmacro with-gensyms (syms &body body)
+  `(let (,@(mapcar (lambda (s) `(,s (gensym))) syms))
+     ,@body))
+
 ;; Exercise 1
 (defvar *x* 'a)
 (defvar *y* 'b)
@@ -18,35 +24,33 @@
 
 ;; Exercise 3
 (defmacro nth-expr (n &rest exprs)
-  (nth (1- n) exprs))
+  (if (integerp n)
+      (nth n exprs)
+      `(case ,n
+       ,@(let ((i -1))
+           (mapcar #'(lambda(x) `(,(incf i) ,x)) exprs)))))
 
 (nth-expr 2 (print 1) (print 2) (print 3))
 
+(let ((i 2))
+  (nth-expr i (print 1) (print 2) (print 3)))
+
 ;; Exercise 4
-(defmacro ntimes-rec (n &body body)
-  (labels ((rec (n acc)
-             (if (> n 0)
-                 (rec (- n 1) (append acc body))
-                 `(progn ,@acc))))
-    (rec n nil)))
+(defmacro ntimes (n &body body)
+  (with-gensyms (times rec-fun)
+    `(let ((,times ,n))
+       (labels ((,rec-fun (n)
+                  (when (> n 0)
+                    ,@body
+                    (,rec-fun (- n 1)))))
+         (,rec-fun ,times)))))
 
-(defmacro ntimes (n &rest body)
-  (let ((g (gensym))
-        (h (gensym)))
-    `(let ((,h ,n))
-       (do ((,g 0 (+ ,g 1)))
-           ((>= ,g ,h))
-           ,@body)))) 
-
-(ntimes-rec 3
+(ntimes 3
   (print 1)
   (print 2))
 
 (let ((i 3))
   (ntimes i (print "lol")))
-
-(let ((i 3))
-  (ntimes-rec i (print "lol")))
 
 ;; Exercise 5
 (defmacro n-of (n expr)
@@ -56,7 +60,24 @@
   (n-of n (incf i))) 
 
 ;; Exercise 6
-(defmacro revert-values (vars &body body)
-  
-  )
+(defmacro with-value-reverting (vars &body body)
+  (let 
+   (
+    (prog1 
+       (progn ,@body) 
+       ,@(mapcar (lambda (var sym) `(setf ,var ,sym)) vars syms)))))
 
+(let ((i 3) (j 5))
+  (with-value-reverting (i j) 
+    (print i)
+    (setf i 32)
+    (print i)
+    (print j)
+    (setf j -3)
+    (print j))
+  (print i)
+  (print j))
+
+;; Exercise 7
+
+;; Exercise 8
